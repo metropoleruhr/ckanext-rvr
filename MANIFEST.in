@@ -1,0 +1,4 @@
+include README.rst
+include LICENSE
+include requirements.txt
+recursive-include ckanext/rvr *.html *.json *.js *.less *.css *.mio *.yaml *.yml *.jpg *.woff2 *.otf

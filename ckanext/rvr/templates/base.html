@@ -1,0 +1,12 @@
+{% ckan_extends %}
+{% block meta %}
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      {{ super() }}
+        {% endblock %}
+{% block styles %}
+  {{ super() }}
+
+
+  {% asset 'rvr/main_css' %}
+
+{% endblock %}

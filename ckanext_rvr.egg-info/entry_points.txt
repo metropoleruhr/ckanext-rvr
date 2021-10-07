@@ -1,0 +1,7 @@
+
+        [ckan.plugins]
+        rvr=ckanext.rvr.plugin:RvrPlugin
+
+        [babel.extractors]
+        ckan = ckan.lib.extract:extract_ckan
+    

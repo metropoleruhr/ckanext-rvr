@@ -1,0 +1,4 @@
+main_css:
+  output: rvr/rvr.css
+  contents:
+    - rvr.css
