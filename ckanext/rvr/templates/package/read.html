@@ -3,7 +3,7 @@
 {% block primary_content_inner %}
 {{ super() }}
 <section class="report-dataset">
-    <h3> <a href="mailto:opendata@rvr.ruhr,support@datopian.com?subject={{ _('Fehler im Datensatz melden') }} {{ h.url_for(controller='dataset', action='read', id=pkg.name, _external=True) }}">{{ _('Fehler im Datensatz melden') }}</a></h3>
+    <h3> <a href="mailto:opendata@rvr.ruhr,support@datopian.com?subject={{ _('Fehler im Datensatz melden') }} {{ h.url_for(controller='dataset', action='read', id=pkg.name, _external=True) }}" target="_blank" rel="noopener noreferrer">{{ _('Fehler im Datensatz melden') }}</a></h3>
 </section>
 
 {% endblock %}
