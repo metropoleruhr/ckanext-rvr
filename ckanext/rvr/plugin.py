@@ -58,8 +58,7 @@ def build_pages_nav_main(*args):
     output = output + get_nav_transport()
     for page in pages_list:
         type_ = 'blog' if page['page_type'] == 'blog' else 'pages'
-        name = urllib.parse.unquote(page['name'])
-        print(page['name'], name)
+        name = urllib.parse.quote(page['name'].encode('utf-8')).decode('utf-8')
         title = cgi.escape(page['title'])
         link = h.literal(u'<a href="/{}/{}">{}</a>'.format(type_, name, title))
         if page['name'] == page_name:
