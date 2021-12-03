@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+  xmlns:dct="http://purl.org/dc/terms/"
+  xmlns:hydra="http://www.w3.org/ns/hydra/core#"
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns:dcat="http://www.w3.org/ns/dcat#"
+  xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:dcatde="http://dcat-ap.de/def/dcatde/"
+  xmlns:owl="http://www.w3.org/2002/07/owl#"
+>
+  <hydra:PagedCollection rdf:about="http://ckan:5000/catalog.rdf?page=1">
+    <hydra:lastPage>http://ckan:5000/catalog.rdf?page=1</hydra:lastPage>
+    <hydra:itemsPerPage rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">100</hydra:itemsPerPage>
+    <hydra:firstPage>http://ckan:5000/catalog.rdf?page=1</hydra:firstPage>
+    <hydra:totalItems rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</hydra:totalItems>
+  </hydra:PagedCollection>
+  <dcat:Catalog rdf:about="http://ckan:5000">
+    <dct:language>en</dct:language>
+    <foaf:homepage rdf:resource="http://ckan:5000"/>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-11-29T11:04:51.903318</dct:modified>
+    <dcat:dataset>
+      <dcat:Dataset rdf:about="http://ckan:5000/dataset/1a6a6561-11d9-4c87-89fa-771339a1df69">
+        <dct:creator>
+          <foaf:Organization rdf:nodeID="N8e1544e5bbfa43e2b9e3d14b1ff76389">
+            <foaf:name>Isaac Aderonmu Author</foaf:name>
+            <foaf:mbox>isaac.aderonmu@author.com</foaf:mbox>
+          </foaf:Organization>
+        </dct:creator>
+        <dcat:landingPage rdf:resource="https://raw.githubusercontent.com/datasets/ppp/master/data/ppp-gdp.csv"/>
+        <dcat:keyword>dcat-test</dcat:keyword>
+        <dct:title>Test Dataset 1</dct:title>
+        <dcat:distribution rdf:resource="http://ckan:5000/dataset/1a6a6561-11d9-4c87-89fa-771339a1df69/resource/8310f374-4214-446f-b148-b4555f554f21"/>
+        <owl:versionInfo>1.0</owl:versionInfo>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-11-29T10:20:37.378574</dct:issued>
+        <dcatde:maintainer>
+          <foaf:Organization rdf:nodeID="Nec9da67347b7424e993cf29638362f9c">
+            <foaf:mbox>isaac.aderonmu@maintainer.com</foaf:mbox>
+            <foaf:name>Isaac Aderonmu Maintainer</foaf:name>
+          </foaf:Organization>
+        </dcatde:maintainer>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-11-29T11:04:51.903318</dct:modified>
+        <dct:description>Some description</dct:description>
+        <dcat:keyword>sample</dcat:keyword>
+        <dcat:keyword>test</dcat:keyword>
+        <dcat:contactPoint>
+          <vcard:Organization rdf:nodeID="N9d11ff7eccbb4a15bd75b13e41568b9b">
+            <vcard:hasEmail rdf:resource="mailto:isaac.aderonmu@maintainer.com"/>
+            <vcard:fn>Isaac Aderonmu Maintainer</vcard:fn>
+          </vcard:Organization>
+        </dcat:contactPoint>
+        <dct:publisher rdf:resource="http://ckan:5000/organization/95c22f3b-1155-4daf-bb2f-8ac659378c3b"/>
+        <dct:identifier>1a6a6561-11d9-4c87-89fa-771339a1df69</dct:identifier>
+      </dcat:Dataset>
+    </dcat:dataset>
+    <dcat:dataset>
+      <dcat:Dataset rdf:about="http://ckan:5000/dataset/d00d6c79-8094-423f-8e69-424d9a5ef8fa">
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-11-11T11:02:30.280409</dct:issued>
+        <dct:publisher rdf:resource="http://ckan:5000/organization/95c22f3b-1155-4daf-bb2f-8ac659378c3b"/>
+        <dcat:distribution rdf:resource="http://ckan:5000/dataset/d00d6c79-8094-423f-8e69-424d9a5ef8fa/resource/243044c3-0dde-417a-8bdf-0303e2276ff2"/>
+        <dct:title>Sample Dataset</dct:title>
+        <dct:identifier>d00d6c79-8094-423f-8e69-424d9a5ef8fa</dct:identifier>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-11-11T11:03:16.156558</dct:modified>
+      </dcat:Dataset>
+    </dcat:dataset>
+    <dct:title>CKAN</dct:title>
+  </dcat:Catalog>
+  <dcat:Distribution rdf:about="http://ckan:5000/dataset/d00d6c79-8094-423f-8e69-424d9a5ef8fa/resource/243044c3-0dde-417a-8bdf-0303e2276ff2">
+    <dct:title>Purchasing Parity Power</dct:title>
+    <dcat:mediaType>text/csv</dcat:mediaType>
+    <dct:format>CSV</dct:format>
+    <dcat:accessURL rdf:resource="https://raw.githubusercontent.com/datasets/ppp/master/data/ppp-gdp.csv"/>
+  </dcat:Distribution>
+  <foaf:Organization rdf:about="http://ckan:5000/organization/95c22f3b-1155-4daf-bb2f-8ac659378c3b">
+    <foaf:name>Sample Organization</foaf:name>
+  </foaf:Organization>
+  <dcat:Distribution rdf:about="http://ckan:5000/dataset/1a6a6561-11d9-4c87-89fa-771339a1df69/resource/8310f374-4214-446f-b148-b4555f554f21">
+    <dcat:mediaType>text/csv</dcat:mediaType>
+    <dcat:accessURL rdf:resource="https://raw.githubusercontent.com/datasets/ppp/master/data/ppp-gdp.csv"/>
+    <dct:description>Some resource description</dct:description>
+    <dct:format>CSV</dct:format>
+    <dct:title>ppp-gdp.csv</dct:title>
+  </dcat:Distribution>
+</rdf:RDF>
