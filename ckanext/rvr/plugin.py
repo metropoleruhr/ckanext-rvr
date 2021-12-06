@@ -69,9 +69,11 @@ def build_pages_nav_main(*args):
 
     return  output 
 
-class RvrPlugin(p.SingletonPlugin):
+class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
     p.implements(p.IConfigurer)
     p.implements(p.ITemplateHelpers)
+    p.implements(p.IDatasetForm)
+
     # IConfigurer
     def get_helpers(self):
         '''Register the most_popular_groups() function above as a template
@@ -81,8 +83,43 @@ class RvrPlugin(p.SingletonPlugin):
         # Template helper function names should begin with the name of the
         # extension they belong to, to avoid clashing with functions from
         # other extensions.
-        return {'get_newest_datasets': get_newest_datasets, 'build_nav_main': build_pages_nav_main, 'get_specific_page': get_specific_page}
+        return {
+            'get_newest_datasets': get_newest_datasets,
+            'build_nav_main': build_pages_nav_main,
+            'get_specific_page': get_specific_page
+        }
+
     def update_config(self, config_):
         toolkit.add_template_directory(config_, 'templates')
         toolkit.add_public_directory(config_, 'public')
         toolkit.add_resource('assets', 'rvr')
+
+    def create_package_schema(self):
+        # let's grab the default schema in our plugin
+        schema = super(RvrPlugin, self).create_package_schema()
+        # our custom field
+        schema.update({
+            'notes': [toolkit.get_validator('not_empty')],
+            'owner_org': [toolkit.get_validator('not_empty')]
+        })
+        return schema
+
+    def update_package_schema(self):
+        # let's grab the default schema in our plugin
+        schema = super(RvrPlugin, self).update_package_schema()
+        # our custom field
+        schema.update({
+            'notes': [toolkit.get_validator('not_empty')],
+            'owner_org': [toolkit.get_validator('not_empty')]
+        })
+        return schema
+
+    def is_fallback(self):
+        # Return True to register this plugin as the default handler for
+        # package types not handled by any other IDatasetForm plugin.
+        return True
+
+    def package_types(self):
+        # This plugin doesn't handle any special package types, it just
+        # registers itself as the default (above).
+        return []
