@@ -1,7 +1,9 @@
 import cgi
-import logging
 import urllib
 import ckan.plugins.toolkit as toolkit
+
+import logging
+log = logging.getLogger(__name__)
 config = toolkit.config
 ignore_missing = toolkit.get_validator('ignore_missing')
 
@@ -23,8 +25,8 @@ def get_specific_page(name=""):
     for page in page_list:
         if page['name'] == name:
             new_list.append(page)
-
     return new_list
+
 def build_pages_nav_main(*args):
 
     about_menu = toolkit.asbool(config.get('ckanext.pages.about_menu', True))
@@ -73,6 +75,7 @@ class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
     p.implements(p.IConfigurer)
     p.implements(p.ITemplateHelpers)
     p.implements(p.IDatasetForm)
+    p.implements(p.IFacets, inherit=True)
 
     # IConfigurer
     def get_helpers(self):
@@ -123,3 +126,13 @@ class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
         # This plugin doesn't handle any special package types, it just
         # registers itself as the default (above).
         return []
+    
+    def dataset_facets(self, facets_dict, package_type):
+        '''
+        Override core search fasets for datasets
+        '''
+        facets_dict['metadata_created'] = "Date Created"
+        facets_dict['metadata_modified'] = "Last Updated"
+        facets_dict['issued'] = "Issued"
+        facets_dict['modified'] = "Modified"
+        return facets_dict
