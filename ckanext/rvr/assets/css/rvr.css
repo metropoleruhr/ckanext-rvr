@@ -751,3 +751,20 @@ div.social-media a i{
     
 }
 /* Footer Bereich Ende */
+
+.daterange-picker {
+    background: #fff;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    width: 100%
+}
+
+.daterange-picker input {
+    border: none;
+    width: 100%
+}
+
+.daterange-picker input:focus{
+    outline: none;
+}

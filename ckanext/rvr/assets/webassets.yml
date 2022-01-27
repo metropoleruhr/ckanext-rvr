@@ -1,4 +1,19 @@
 main_css:
   output: rvr/rvr.css
   contents:
-    - rvr.css
+    - css/rvr.css
+
+daterange_css:
+  output: rvr/%(version)s_daterange.css
+  contents:
+    - css/daterangepicker.css
+
+daterange_js:
+  output: rvr/%(version)s_daterange.js
+  extra:
+    preload:
+      - vendor/jquery
+  contents:
+    - js/rvrDateRange.js
+    - js/daterangepicker.min.js
+    - js/moment.min.js
