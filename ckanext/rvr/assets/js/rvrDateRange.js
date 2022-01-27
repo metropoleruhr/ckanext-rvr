@@ -25,7 +25,6 @@ const generateFilterHref = (facet, startDate, endDate) => {
 const generateDaterangePicker = (item) => {
 
     const initialData = $(fieldId(item)).data()
-    console.log(initialData)
     let start = moment();
     let end = moment();
     if (initialData.startdate) {
@@ -33,10 +32,7 @@ const generateDaterangePicker = (item) => {
     }
     if (initialData.enddate) {
         end = moment(initialData.enddate, 'DD-MM-YYYY');
-    }
-    console.log('Start', start.format('DD MMMM, YYYY'))
-    console.log('End', end.format('DD MMMM, YYYY'))
-    
+    }    
 
     $(fieldId(item)).daterangepicker({
         "showDropdowns": true,
