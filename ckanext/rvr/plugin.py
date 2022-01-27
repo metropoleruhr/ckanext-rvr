@@ -1,6 +1,8 @@
 import cgi
 import urllib
 import ckan.plugins.toolkit as toolkit
+from ckanext.rvr.views.dataset import dataset_blueprint
+from ckanext.rvr import actions as rvrActions
 
 import logging
 log = logging.getLogger(__name__)
@@ -9,6 +11,7 @@ ignore_missing = toolkit.get_validator('ignore_missing')
 
 import ckan.plugins as p
 import ckan.lib.helpers as h
+
 def get_newest_datasets():
     results = toolkit.get_action('current_package_list_with_resources')({},{"limit":5})
     return results
@@ -76,6 +79,13 @@ class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
     p.implements(p.ITemplateHelpers)
     p.implements(p.IDatasetForm)
     p.implements(p.IFacets, inherit=True)
+    p.implements(p.IBlueprint)
+    p.implements(p.IActions)
+
+
+    # IBlueprint
+    def get_blueprint(self):
+        return [dataset_blueprint]
 
     # IConfigurer
     def get_helpers(self):
@@ -136,3 +146,13 @@ class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
         facets_dict['issued'] = "Issued"
         facets_dict['modified'] = "Modified"
         return facets_dict
+
+    # IActions
+    def get_actions(self):
+        '''
+        Define custom functions (or override existing ones).
+        Available via API /api/action/{action-name}
+        '''
+        return {
+            'package_search': rvrActions.package_search
+        }
