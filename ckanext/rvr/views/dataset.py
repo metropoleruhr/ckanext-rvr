@@ -19,7 +19,6 @@ import ckan.plugins as plugins
 from ckan.common import _, config, g, request
 from ckan.lib.plugins import lookup_package_plugin
 from ckan.lib.search import SearchError, SearchQueryError
-from dateutil import parser
 
 
 NotFound = logic.NotFound
@@ -149,59 +148,6 @@ def _get_search_details():
         u'search_extras': search_extras,
     }
 
-def filter_by_daterange(facet, dates, query_object):
-
-    # Check that there is at least a start or end date
-    if not dates[0] and not dates[1]:
-        return query_object
-
-    # Get start and end date objects
-    start_date = None
-    end_date = None
-    try:
-        if dates[0]:
-            start_date = parser.parse(dates[0]).date()
-        if dates[1]:
-            end_date = parser.parse(dates[1]).date()
-    except ValueError as e:
-        log.error('Date parsing failed with error: {}'.format(e))
-        return query_object
-
-    updated_results = []
-
-    for pkg in query_object['results']:
-        is_in_range = True
-        facet_date_str = ''
-        if pkg.get(facet, ''):
-            facet_date_str = pkg[facet]
-        else:
-            for item in pkg['extras']:
-                if item.get('key', '') == facet:
-                    facet_date_str = item['value']
-
-        if facet_date_str:
-            try:
-                facet_date = parser.parse(facet_date_str).date()
-            except ValueError as e:
-                log.error('Date parsing failed with error: {}'.format(e))
-                return query_object
-
-            # Check if datetime object is in range
-            if start_date and start_date > facet_date:
-                is_in_range = False
-            if end_date and facet_date > end_date:
-                is_in_range = False
-
-            if is_in_range:
-                updated_results.append(pkg)
-        else:
-            return query_object
-
-    count = len(updated_results)
-    query_object['results'] = updated_results
-    query_object['count'] = count
-    return query_object
-
 def search(package_type):
     extra_vars = {}
 
@@ -325,25 +271,19 @@ def search(package_type):
         u'q': q,
         u'fq': fq.strip(),
         u'facet.field': list(facets.keys()),
-        u'rows': 1000,
-        # u'start': (page - 1) * limit,
-        u'start': 0,
+        u'facet.limit': -1,
+        u'rows': limit,
+        u'start': (page - 1) * limit,
         u'sort': sort_by,
         u'extras': search_extras,
         u'include_private': asbool(
             config.get(u'ckan.search.default_include_private', True)
         ),
+        u'dateranges': dateranges
     }
+
     try:
-        origin_query = get_action(u'package_search')(context, data_dict)
-
-        query = origin_query.copy()
-
-        for k in dateranges:
-            query = filter_by_daterange(k, dateranges[k], query)
-        
-        #TODO: if after a daterange filter, and there are still items left
-        # redo the filter for the new items
+        query = get_action(u'package_search')(context, data_dict)
 
         extra_vars[u'sort_by_selected'] = query[u'sort']
 

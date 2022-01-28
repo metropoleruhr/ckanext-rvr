@@ -1,6 +1,8 @@
+from dataclasses import field
 import json
 import logging
 from six import text_type
+from dateutil import parser
 
 from ckan.lib.navl import dictization_functions
 import ckan.logic as logic
@@ -15,6 +17,103 @@ toolkit = plugins.toolkit
 _validate = dictization_functions.validate
 ValidationError = logic.ValidationError
 _check_access = logic.check_access
+
+def get_package_field(field, package):
+    '''
+    Check package and package extras and get the value of the field if \
+    it exists
+    '''
+    value = None
+    if package.get(field, ''):
+        value = package[field]
+    else:
+        for item in package['extras']:
+            if item.get('key', '') == field:
+                value = item['value']
+    return value
+
+def filter_daterange(facet, dates, package):
+
+    # Check that there is at least a start or end date
+    if not dates[0] and not dates[1]:
+        return True
+
+    # Get start and end date objects
+    start_date = None
+    end_date = None
+    try:
+        if dates[0]:
+            start_date = parser.parse(dates[0]).date()
+        if dates[1]:
+            end_date = parser.parse(dates[1]).date()
+    except ValueError as e:
+        log.error('Date parsing failed with error: {}'.format(e))
+        return True
+
+    is_in_range = True
+    facet_date_str = get_package_field(facet, package)
+
+    if facet_date_str:
+        try:
+            facet_date = parser.parse(facet_date_str).date()
+        except ValueError as e:
+            log.error('Date parsing failed with error: {}'.format(e))
+            return True
+
+        # Check if datetime object is in range
+        if start_date and start_date > facet_date:
+            is_in_range = False
+        if end_date and facet_date > end_date:
+            is_in_range = False
+    else:
+        return True
+
+    return is_in_range
+
+def update_facets(facets, package):
+    for facet in facets:
+        if facet in ['tags', 'groups', 'organization']:
+            pop_items = []
+            for facet_item in facets[facet]:
+                if facet in ['organization']:
+                    item = package[facet]
+                    if item['name'] == facet_item:
+                        facets[facet][facet_item] -= 1
+                        if facets[facet][facet_item] == 0:
+                            pop_items.append(facet_item)
+                if facet in ['tags', 'groups']:
+                    for item in package[facet]:
+                        if item['name'] == facet_item:
+                            facets[facet][facet_item] -= 1
+                            if facets[facet][facet_item] == 0:
+                                pop_items.append(facet_item)
+            for i in pop_items:
+                facets[facet].pop(i)
+        elif facet == 'res_format':
+            pop_items = []
+            for facet_item in facets[facet]:
+                for item in package['resources']:
+                    if item['format'] == facet_item:
+                        facets[facet][facet_item] -= 1
+                        if facets[facet][facet_item] == 0:
+                            pop_items.append(facet_item)
+            for i in pop_items:
+                facets[facet].pop(i)
+        else:
+            pop_items = []
+            value = get_package_field(facet, package)
+            if facet in ['metadata_created', 'metadata_modified']:
+                value = parser.parse(value).date().strftime('%m-%d-%Y')
+            for item in facets[facet]:
+                if value == item or \
+                facet in ['metadata_created', 'metadata_modified'] and \
+                value == parser.parse(item).date().strftime('%m-%d-%Y'):
+                    facets[facet][item] -= 1
+                    if facets[facet][item] == 0:
+                        pop_items.append(item)
+            for i in pop_items:
+                facets[facet].pop(i)
+    return facets
 
 @toolkit.side_effect_free
 def package_search(context, data_dict):
@@ -145,6 +244,12 @@ def package_search(context, data_dict):
         fl can be  None or a list of result fields, such as ['id', 'extras_custom_field'].
         if fl = None, datasets are returned as a list of full dictionary.
     '''
+    # Get dateranges
+    dateranges = data_dict.pop('dateranges', {})
+    items_per_page = data_dict.pop('rows', 20)
+    start = data_dict.pop('start', 0)
+    data_dict['rows'] = 1000
+    data_dict['start'] = 0
 
     # sometimes context['schema'] is None
     schema = (context.get('schema') or
@@ -217,46 +322,77 @@ def package_search(context, data_dict):
                 ).get_user_dataset_labels(context['auth_user_obj'])
 
         query = search.query_for(model.Package)
-        query.run(data_dict, permission_labels=labels)
 
-        # Add them back so extensions can use them on after_search
-        data_dict['extras'] = extras
+        def get_filtered_packages(extras=extras):
+            removed_packages_count = 0
+            query.run(data_dict, permission_labels=labels)
+            facets = query.facets
 
-        if result_fl:
-            for package in query.results:
-                if isinstance(package, text_type):
-                    package = {result_fl[0]: package}
-                extras = package.pop('extras', {})
-                package.update(extras)
-                results.append(package)
-        else:
-            for package in query.results:
-                # get the package object
-                package_dict = package.get(data_source)
-                ## use data in search index if there
-                if package_dict:
-                    # the package_dict still needs translating when being viewed
-                    package_dict = json.loads(package_dict)
-                    if context.get('for_view'):
-                        for item in plugins.PluginImplementations(
-                                plugins.IPackageController):
-                            package_dict = item.before_view(package_dict)
-                    results.append(package_dict)
-                else:
-                    log.error('No package_dict is coming from solr for package '
-                              'id %s', package['id'])
+            # Add them back so extensions can use them on after_search
+            data_dict['extras'] = extras
 
-        count = query.count
-        facets = query.facets
+            if result_fl:
+                for package in query.results:
+                    if isinstance(package, text_type):
+                        package = {result_fl[0]: package}
+                    extras = package.pop('extras', {})
+                    package.update(extras)
+
+                    # Check daterange
+                    is_in_range = True
+                    for k in dateranges:
+                        if not filter_daterange(k, dateranges[k], package):
+                            is_in_range = False
+                            break
+                    if not is_in_range:
+                        removed_packages_count += 1
+                        # Remove facet representations
+                        facets = update_facets(facets, package)
+                        continue
+                    results.append(package)
+            else:
+                for package in query.results:
+                    # get the package object
+                    package_dict = package.get(data_source)
+                    ## use data in search index if there
+                    if package_dict:
+                        # the package_dict still needs translating when being viewed
+                        package_dict = json.loads(package_dict)
+                        if context.get('for_view'):
+                            for item in plugins.PluginImplementations(
+                                    plugins.IPackageController):
+                                package_dict = item.before_view(package_dict)
+                        # Check daterange
+                        is_in_range = True
+                        for k in dateranges:
+                            if not filter_daterange(k, dateranges[k], package_dict):
+                                is_in_range = False
+                                break
+                        if not is_in_range:
+                            removed_packages_count += 1
+                            # Remove facet representations
+                            facets = update_facets(facets, package_dict)
+                            continue
+                        results.append(package_dict)
+                    else:
+                        log.error('No package_dict is coming from solr for package '
+                                'id %s', package['id'])
+            return removed_packages_count, facets
+
+        removed_packages_count, facets = get_filtered_packages()
+
+        count = int(query.count) - removed_packages_count
     else:
         count = 0
         facets = {}
         results = []
 
+    paginated_results = results[start:start+items_per_page]
+
     search_results = {
         'count': count,
         'facets': facets,
-        'results': results,
+        'results': paginated_results,
         'sort': data_dict['sort']
     }
 

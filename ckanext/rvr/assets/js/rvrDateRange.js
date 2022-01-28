@@ -1,4 +1,9 @@
-const daterangeFields = ['metadata_created', 'metadata_modified', 'issued', 'modified'];
+const daterangeFields = {
+    'metadata_created': 'Date Created',
+    'metadata_modified': 'Last Updated',
+    'issued': 'Issued',
+    'modified': 'Modified'
+};
 const fieldId = name => `#${name}-daterange-field`;
 
 const generateFilterHref = (facet, startDate, endDate) => {
@@ -10,6 +15,7 @@ const generateFilterHref = (facet, startDate, endDate) => {
         oldUrl.searchParams.getAll(`_${facet}_end`).length) {
         oldUrl.searchParams.delete(`_${facet}_start`);
         oldUrl.searchParams.delete(`_${facet}_end`);
+        oldUrl.searchParams.delete('page');
     }
 
     let bridge = oldUrl.search.trim() ? '&' : '?';
@@ -22,17 +28,72 @@ const generateFilterHref = (facet, startDate, endDate) => {
     return `${oldUrl.href}${bridge}${facetQuery}`
 }
 
+const cancelDaterangeFilterItem = (event, facet, type) => {
+    event.preventDefault();
+    parentSpan = event.target.closest('span.filtered.pill');
+    let url = new URL(document.location.href);
+
+    url.searchParams.delete('page');
+    if (type === 'min') url.searchParams.delete(`_${facet}_start`);
+    if (type === 'max') url.searchParams.delete(`_${facet}_end`);
+
+    document.location.href = url.href;
+}
+
+const addFilterListItem = (item, minFilter, maxFilter) => {
+    const parentElement = document.querySelector('p.filter-list');
+    
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'facet';
+    titleSpan.innerText = ` ${daterangeFields[item]}: `;
+
+    const generateCancelAnchor = type => {
+        const cancelAnchor = document.createElement('a');
+        cancelAnchor.className = 'remove';
+        cancelAnchor.href = ''
+        const cancelIcon = document.createElement('i');
+        cancelIcon.className = 'fa fa-times';
+        cancelAnchor.appendChild(cancelIcon);
+        cancelAnchor.onclick = ev => {
+            cancelDaterangeFilterItem(ev, item, type);
+        }
+        return cancelAnchor;
+    }
+
+    const generateFilterPillSpan = (filter, type) => {
+        const filterPill = document.createElement('span');
+        filterPill.className = 'filtered pill';
+        filterPill.innerText = `${type}:  ${filter} `;
+        filterPill.appendChild(generateCancelAnchor(type));
+        return filterPill;
+    }
+
+    if (minFilter || maxFilter) {
+        parentElement.appendChild(titleSpan);
+        if (minFilter) parentElement.appendChild(
+            generateFilterPillSpan(minFilter, 'min'));
+        if (maxFilter) parentElement.appendChild(
+            generateFilterPillSpan(maxFilter, 'max'));
+    }
+}
+
 const generateDaterangePicker = (item) => {
 
     const initialData = $(fieldId(item)).data()
-    let start = moment();
+    let start = moment().subtract(20, 'year');
     let end = moment();
+    let minFilter = '';
+    let maxFilter = '';
     if (initialData.startdate) {
         start = moment(initialData.startdate, 'DD-MM-YYYY');
+        minFilter = start.format('DD MMMM, YYYY');
     }
     if (initialData.enddate) {
         end = moment(initialData.enddate, 'DD-MM-YYYY');
-    }    
+        maxFilter = end.format('DD MMMM, YYYY');
+    }
+
+    addFilterListItem(item, minFilter, maxFilter)
 
     $(fieldId(item)).daterangepicker({
         "showDropdowns": true,
@@ -80,7 +141,7 @@ const generateDaterangePicker = (item) => {
 }
 
 $(function() {
-    daterangeFields.forEach(item => {
+    Object.keys(daterangeFields).forEach(item => {
         generateDaterangePicker(item);
     });
 
