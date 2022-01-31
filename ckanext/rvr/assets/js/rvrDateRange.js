@@ -1,11 +1,21 @@
+// Declare daterange fields
 const daterangeFields = {
     'metadata_created': 'Date Created',
     'metadata_modified': 'Last Updated',
     'issued': 'Issued',
     'modified': 'Modified'
 };
+
+// Generate field id from facet name
 const fieldId = name => `#${name}-daterange-field`;
 
+/**
+ * Generate the url for daterange search parameters
+ * @param {String} facet 
+ * @param {Moment} startDate 
+ * @param {Moment} endDate 
+ * @returns new url string with search parameters
+ */
 const generateFilterHref = (facet, startDate, endDate) => {
     let oldUrl = new URL(document.location.href);
     let start = startDate.format('DD-MM-YYYY');
@@ -28,6 +38,13 @@ const generateFilterHref = (facet, startDate, endDate) => {
     return `${oldUrl.href}${bridge}${facetQuery}`
 }
 
+/**
+ * Removes a search parameter and returns a new page without the removed
+ * parameter
+ * @param {Event} event 
+ * @param {String} facet 
+ * @param {String} type 
+ */
 const cancelDaterangeFilterItem = (event, facet, type) => {
     event.preventDefault();
     parentSpan = event.target.closest('span.filtered.pill');
@@ -40,13 +57,27 @@ const cancelDaterangeFilterItem = (event, facet, type) => {
     document.location.href = url.href;
 }
 
+/**
+ * Generates filter list elements in the DOM for the dateranges
+ * @param {String} item facet name 
+ * @param {String} minFilter start date
+ * @param {String} maxFilter end date
+ */
 const addFilterListItem = (item, minFilter, maxFilter) => {
+    // Get parent element
     const parentElement = document.querySelector('p.filter-list');
     
+    // Create element for facet display name
     const titleSpan = document.createElement('span');
     titleSpan.className = 'facet';
     titleSpan.innerText = ` ${daterangeFields[item]}: `;
 
+    /**
+     * Generates an anchor element that removes a daterange filter when
+     * clicked
+     * @param {String} type filter type either `min` or `max`
+     * @returns HTML anchor element
+     */
     const generateCancelAnchor = type => {
         const cancelAnchor = document.createElement('a');
         cancelAnchor.className = 'remove';
@@ -60,6 +91,12 @@ const addFilterListItem = (item, minFilter, maxFilter) => {
         return cancelAnchor;
     }
 
+    /**
+     * Generates the filter items
+     * @param {String} filter date string
+     * @param {String} type filter type either `min` or `max`
+     * @returns filter pill HTMLSpanElement
+     */
     const generateFilterPillSpan = (filter, type) => {
         const filterPill = document.createElement('span');
         filterPill.className = 'filtered pill';
@@ -77,6 +114,10 @@ const addFilterListItem = (item, minFilter, maxFilter) => {
     }
 }
 
+/**
+ * Generate the DateRanger picker feature in the DOM
+ * @param {String} item facet name 
+ */
 const generateDaterangePicker = (item) => {
 
     const initialData = $(fieldId(item)).data()

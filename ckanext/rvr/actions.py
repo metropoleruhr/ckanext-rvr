@@ -32,6 +32,10 @@ def get_package_field(field, package):
     return value
 
 def filter_daterange(facet, dates, package):
+    '''
+    Checks if the date of a field in a dataset is within a defined date \
+    range.
+    '''
 
     # Check that there is at least a start or end date
     # No dates specified, packages passes
@@ -75,6 +79,10 @@ def filter_daterange(facet, dates, package):
     return is_in_range
 
 def update_facets(facets, package):
+    '''
+    After filtering, update the facets being sent from solr to reflect the \
+    changes.
+    '''
     for facet in facets:
         if facet in ['tags', 'groups', 'organization']:
             pop_items = []
@@ -329,7 +337,12 @@ def package_search(context, data_dict):
         # Save a copy of the original data_dict
         permanent_data_dict = data_dict.copy()
 
-        def get_filtered_packages(scanned_package_count=0, removed_packages_count=0, facets={}, extras=extras):
+        def get_filtered_packages(
+            scanned_package_count=0, removed_packages_count=0, facets={}, extras=extras
+        ):
+            '''
+            Make query to solr and also filter results by dateranges if available
+            '''
             # Pass the original data_dict as it changes after each iteration
             data_dict = permanent_data_dict.copy()
             if scanned_package_count:
@@ -396,16 +409,18 @@ def package_search(context, data_dict):
         scanned_packages_count = 0
         removed_packages_count = 0
         facets = {}
+        # A 'do-while' loop implementation to run at least one solr search
+        # and keep running searches till all the packages from the original
+        # search have been filtered
         while True:
             scanned_packages_count, removed_packages_count, facets = get_filtered_packages(
                 scanned_package_count=scanned_packages_count,
                 removed_packages_count=removed_packages_count,
                 facets=facets
             )
-
+            # Break loop once all query results have been searched through
             if int(query.count) <= scanned_packages_count:
                 break
-
         count = int(query.count) - removed_packages_count
     else:
         count = 0
