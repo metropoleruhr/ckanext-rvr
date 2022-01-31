@@ -80,7 +80,7 @@ const addFilterListItem = (item, minFilter, maxFilter) => {
 const generateDaterangePicker = (item) => {
 
     const initialData = $(fieldId(item)).data()
-    let start = moment().subtract(20, 'year');
+    let start = moment();
     let end = moment();
     let minFilter = '';
     let maxFilter = '';

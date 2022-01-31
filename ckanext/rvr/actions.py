@@ -1,4 +1,3 @@
-from dataclasses import field
 import json
 import logging
 from six import text_type
@@ -35,6 +34,7 @@ def get_package_field(field, package):
 def filter_daterange(facet, dates, package):
 
     # Check that there is at least a start or end date
+    # No dates specified, packages passes
     if not dates[0] and not dates[1]:
         return True
 
@@ -47,6 +47,7 @@ def filter_daterange(facet, dates, package):
         if dates[1]:
             end_date = parser.parse(dates[1]).date()
     except ValueError as e:
+        # Incorrect date format from parameter, package passes
         log.error('Date parsing failed with error: {}'.format(e))
         return True
 
@@ -57,8 +58,9 @@ def filter_daterange(facet, dates, package):
         try:
             facet_date = parser.parse(facet_date_str).date()
         except ValueError as e:
+            # Package is storing incorrect date type, don't show package
             log.error('Date parsing failed with error: {}'.format(e))
-            return True
+            return False
 
         # Check if datetime object is in range
         if start_date and start_date > facet_date:
@@ -66,7 +68,9 @@ def filter_daterange(facet, dates, package):
         if end_date and facet_date > end_date:
             is_in_range = False
     else:
-        return True
+        # The package doesn't have the field being filtered for at all, don't
+        # show
+        return False
 
     return is_in_range
 
@@ -322,17 +326,26 @@ def package_search(context, data_dict):
                 ).get_user_dataset_labels(context['auth_user_obj'])
 
         query = search.query_for(model.Package)
+        # Save a copy of the original data_dict
+        permanent_data_dict = data_dict.copy()
 
-        def get_filtered_packages(extras=extras):
-            removed_packages_count = 0
+        def get_filtered_packages(scanned_package_count=0, removed_packages_count=0, facets={}, extras=extras):
+            # Pass the original data_dict as it changes after each iteration
+            data_dict = permanent_data_dict.copy()
+            if scanned_package_count:
+                data_dict['start'] = scanned_package_count
             query.run(data_dict, permission_labels=labels)
-            facets = query.facets
+            if not facets:
+                current_facets = query.facets
+            else:
+                current_facets = facets
 
             # Add them back so extensions can use them on after_search
             data_dict['extras'] = extras
 
             if result_fl:
                 for package in query.results:
+                    scanned_package_count += 1
                     if isinstance(package, text_type):
                         package = {result_fl[0]: package}
                     extras = package.pop('extras', {})
@@ -347,11 +360,12 @@ def package_search(context, data_dict):
                     if not is_in_range:
                         removed_packages_count += 1
                         # Remove facet representations
-                        facets = update_facets(facets, package)
+                        current_facets = update_facets(current_facets, package)
                         continue
                     results.append(package)
             else:
                 for package in query.results:
+                    scanned_package_count += 1
                     # get the package object
                     package_dict = package.get(data_source)
                     ## use data in search index if there
@@ -371,15 +385,26 @@ def package_search(context, data_dict):
                         if not is_in_range:
                             removed_packages_count += 1
                             # Remove facet representations
-                            facets = update_facets(facets, package_dict)
+                            current_facets = update_facets(current_facets, package_dict)
                             continue
                         results.append(package_dict)
                     else:
                         log.error('No package_dict is coming from solr for package '
                                 'id %s', package['id'])
-            return removed_packages_count, facets
+            return scanned_package_count, removed_packages_count, current_facets
 
-        removed_packages_count, facets = get_filtered_packages()
+        scanned_packages_count = 0
+        removed_packages_count = 0
+        facets = {}
+        while True:
+            scanned_packages_count, removed_packages_count, facets = get_filtered_packages(
+                scanned_package_count=scanned_packages_count,
+                removed_packages_count=removed_packages_count,
+                facets=facets
+            )
+
+            if int(query.count) <= scanned_packages_count:
+                break
 
         count = int(query.count) - removed_packages_count
     else:
