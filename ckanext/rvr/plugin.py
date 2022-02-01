@@ -1,12 +1,17 @@
 import cgi
-import logging
 import urllib
 import ckan.plugins.toolkit as toolkit
+from ckanext.rvr.views.dataset import dataset_blueprint
+from ckanext.rvr import actions as rvrActions
+
+import logging
+log = logging.getLogger(__name__)
 config = toolkit.config
 ignore_missing = toolkit.get_validator('ignore_missing')
 
 import ckan.plugins as p
 import ckan.lib.helpers as h
+
 def get_newest_datasets():
     results = toolkit.get_action('current_package_list_with_resources')({},{"limit":5})
     return results
@@ -23,8 +28,8 @@ def get_specific_page(name=""):
     for page in page_list:
         if page['name'] == name:
             new_list.append(page)
-
     return new_list
+
 def build_pages_nav_main(*args):
 
     about_menu = toolkit.asbool(config.get('ckanext.pages.about_menu', True))
@@ -73,6 +78,14 @@ class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
     p.implements(p.IConfigurer)
     p.implements(p.ITemplateHelpers)
     p.implements(p.IDatasetForm)
+    p.implements(p.IFacets, inherit=True)
+    p.implements(p.IBlueprint)
+    p.implements(p.IActions)
+
+
+    # IBlueprint
+    def get_blueprint(self):
+        return [dataset_blueprint]
 
     # IConfigurer
     def get_helpers(self):
@@ -123,3 +136,23 @@ class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
         # This plugin doesn't handle any special package types, it just
         # registers itself as the default (above).
         return []
+    
+    def dataset_facets(self, facets_dict, package_type):
+        '''
+        Override core search fasets for datasets
+        '''
+        facets_dict['metadata_created'] = "Date Created"
+        facets_dict['metadata_modified'] = "Last Updated"
+        facets_dict['issued'] = "Issued"
+        facets_dict['modified'] = "Modified"
+        return facets_dict
+
+    # IActions
+    def get_actions(self):
+        '''
+        Define custom functions (or override existing ones).
+        Available via API /api/action/{action-name}
+        '''
+        return {
+            'package_search': rvrActions.package_search
+        }
