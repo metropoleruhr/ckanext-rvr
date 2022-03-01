@@ -7,7 +7,7 @@ const daterangeFields = {
 };
 
 // Generate field id from facet name
-const fieldId = name => `#${name}-daterange-field`;
+const fieldId = name => `#daterange-input-field`;
 
 /**
  * Generate the url for daterange search parameters
@@ -20,20 +20,21 @@ const generateFilterHref = (facet, startDate, endDate) => {
     let oldUrl = new URL(document.location.href);
     let start = startDate.format('DD-MM-YYYY');
     let end = endDate.format('DD-MM-YYYY');
-    
-    if (oldUrl.searchParams.getAll(`_${facet}_start`).length ||
-        oldUrl.searchParams.getAll(`_${facet}_end`).length) {
-        oldUrl.searchParams.delete(`_${facet}_start`);
-        oldUrl.searchParams.delete(`_${facet}_end`);
-        oldUrl.searchParams.delete('page');
-    }
+
+    Object.keys(daterangeFields).forEach(key => {
+        oldUrl.searchParams.delete(`_${key}_start`);
+        oldUrl.searchParams.delete(`_${key}_end`);
+    });
+    oldUrl.searchParams.delete('page');
+    oldUrl.searchParams.delete('_active_range');
 
     let bridge = oldUrl.search.trim() ? '&' : '?';
 
     const startParam = `_${facet}_start=${start}`;
     const endParam = `_${facet}_end=${end}`;
+    const active = `_active_range=${facet}`;
 
-    let facetQuery = `${startParam}&${endParam}`
+    let facetQuery = `${startParam}&${endParam}&${active}`
 
     return `${oldUrl.href}${bridge}${facetQuery}`
 }
@@ -176,15 +177,12 @@ const generateDaterangePicker = (item) => {
             ]
         },
     }, (start, end, label) => {
-        const newUrl = generateFilterHref(item, start, end);
+        const facet = $('#daterange-select').val();
+        const newUrl = generateFilterHref(facet, start, end);
         document.location.href = newUrl;
     });
 }
 
 $(function() {
-    Object.keys(daterangeFields).forEach(item => {
-        generateDaterangePicker(item);
-    });
-
+    generateDaterangePicker($('#daterange-select').val());
 });
-

@@ -164,25 +164,49 @@ def search(package_type):
     # unicode format (decoded from utf8)
     extra_vars[u'q'] = q = request.args.get(u'q', u'')
 
+    # Get Active date range filter
+    active_range = request.args.get('_active_range')
     # Get Daterange fields
     dateranges = {
-        'metadata_created': [
-            request.args.get('_metadata_created_start', ''),
-            request.args.get('_metadata_created_end', '')
-        ],
-        'metadata_modified': [
-            request.args.get('_metadata_modified_start', ''),
-            request.args.get('_metadata_modified_end', '')
-        ],
-        'issued': [
-            request.args.get('_issued_start', ''),
-            request.args.get('_issued_end', '')
-        ],
-        'modified': [
-            request.args.get('_modified_start', ''),
-            request.args.get('_modified_end', '')
-        ]
+        'metadata_created': {
+            'title': 'Date Created',
+            'params': [
+                request.args.get('_metadata_created_start', ''),
+                request.args.get('_metadata_created_end', '')
+            ]
+        },
+        'metadata_modified': {
+            'title': 'Last Updated',
+            'params': [
+                request.args.get('_metadata_modified_start', ''),
+                request.args.get('_metadata_modified_end', '')
+            ]
+        },
+        'issued': {
+            'title': 'Issued',
+            'params': [
+                request.args.get('_issued_start', ''),
+                request.args.get('_issued_end', '')
+            ],
+        },
+        'modified': {
+            'title': 'Modified',
+            'params': [
+                request.args.get('_modified_start', ''),
+                request.args.get('_modified_end', '')
+            ]
+        }
     }
+    # Set default if a valid active_range was not sent by the user
+    if active_range not in dateranges.keys():
+        active_range = 'metadata_created'
+    # Generate date range options list to be sent to the client
+    daterange_options = []
+    for k, v in dateranges.items():
+        daterange_options.append({
+            'name': k,
+            'title': v['title']
+        })
 
     extra_vars['query_error'] = False
     page = h.get_page_number(request.args)
@@ -297,6 +321,8 @@ def search(package_type):
         extra_vars[u'search_facets'] = query[u'search_facets']
         extra_vars[u'page'].items = query[u'results']
         extra_vars[u'dateranges'] = dateranges
+        extra_vars[u'active_range'] = active_range
+        extra_vars[u'daterange_options'] = daterange_options
     except SearchQueryError as se:
         # User's search parameters are invalid, in such a way that is not
         # achievable with the web interface, so return a proper error to

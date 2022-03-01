@@ -1,7 +1,5 @@
 {% ckan_extends %}
 
-{% set daterange_fields = ['Date Created', 'Last Updated', 'Issued', 'Modified'] %}
-
 {% block facet_list %}
     {% set hide_empty = hide_empty or false %}
     {% with items = items or h.get_facet_items_dict(name, search_facets or c.search_facets) %}
@@ -21,7 +19,7 @@
                     </h2>
                     {% endblock %}
 
-                    {% if title not in daterange_fields %}
+                    {% if title != "Date Filters" %}
                         {% block facet_list_items %}
                             {% with items = items or h.get_facet_items_dict(name, limit=1000) %}
                                 {% set transports = items|selectattr('name','equalto','verkehrsdaten-metropole-ruhr')%}
@@ -82,7 +80,7 @@
                             {% endwith %}
                         {% endblock %}
                     {% else %}
-                        {{ h.snippet('snippets/daterange_facet.html', title=title, name=name, dateranges=dateranges) }}
+                        {{ h.snippet('snippets/daterange_facet.html', active=active_range, options=daterange_options, dateranges=dateranges) }}
                     {% endif %}
 
                 </section>
