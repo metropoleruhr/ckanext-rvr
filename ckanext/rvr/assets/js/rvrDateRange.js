@@ -116,24 +116,36 @@ const addFilterListItem = (item, minFilter, maxFilter) => {
 }
 
 /**
+ * Get the date passed from the backend or default to today
+ * 
+ * @returns an array of the start and end dates
+ */
+const getFieldData = () => {
+    const initialData = $(fieldId).data()
+    let start = moment();
+    let end = moment();
+    if (initialData.startdate) {
+        start = moment(initialData.startdate, 'DD-MM-YYYY');
+    }
+    if (initialData.enddate) {
+        end = moment(initialData.enddate, 'DD-MM-YYYY');
+    }
+
+    return [start, end]
+}
+
+/**
  * Generate the DateRanger picker feature in the DOM
  * @param {String} item facet name 
  */
 const generateDaterangePicker = (item) => {
 
-    const initialData = $(fieldId).data()
-    let start = moment();
-    let end = moment();
+    [start, end] = getFieldData();
     let minFilter = '';
     let maxFilter = '';
-    if (initialData.startdate) {
-        start = moment(initialData.startdate, 'DD-MM-YYYY');
-        minFilter = start.format('DD.MM.YYYY');
-    }
-    if (initialData.enddate) {
-        end = moment(initialData.enddate, 'DD-MM-YYYY');
-        maxFilter = end.format('DD.MM.YYYY');
-    }
+
+    minFilter = start.format('DD.MM.YYYY');
+    maxFilter = end.format('DD.MM.YYYY');
 
     addFilterListItem(item, minFilter, maxFilter)
 
@@ -179,11 +191,7 @@ $(function() {
     generateDaterangePicker($('#daterange-select').val());
 
     $('#daterange-select').on('change', () => {
-        const initialData = $(fieldId).data()
-        let start = moment();
-        let end = moment();
-        start = moment(initialData.startdate, 'DD-MM-YYYY');
-        end = moment(initialData.enddate, 'DD-MM-YYYY');
+        [start, end] = getFieldData();
 
         const facet = $('#daterange-select').val();
         const newUrl = generateFilterHref(facet, start, end);
