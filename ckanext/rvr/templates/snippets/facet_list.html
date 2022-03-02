@@ -19,7 +19,7 @@
                     </h2>
                     {% endblock %}
 
-                    {% if title != "Date Filters" %}
+                    {% if name != "date_filters" %}
                         {% block facet_list_items %}
                             {% with items = items or h.get_facet_items_dict(name, limit=1000) %}
                                 {% set transports = items|selectattr('name','equalto','verkehrsdaten-metropole-ruhr')%}

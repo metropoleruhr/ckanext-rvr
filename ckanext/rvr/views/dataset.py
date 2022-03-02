@@ -169,28 +169,28 @@ def search(package_type):
     # Get Daterange fields
     dateranges = {
         'metadata_created': {
-            'title': 'Date Created',
+            'title': 'Erstellt',
             'params': [
                 request.args.get('_metadata_created_start', ''),
                 request.args.get('_metadata_created_end', '')
             ]
         },
         'metadata_modified': {
-            'title': 'Last Updated',
+            'title': 'Zuletzt Aktualisiert',
             'params': [
                 request.args.get('_metadata_modified_start', ''),
                 request.args.get('_metadata_modified_end', '')
             ]
         },
         'issued': {
-            'title': 'Issued',
+            'title': 'Veröffentlicht',
             'params': [
                 request.args.get('_issued_start', ''),
                 request.args.get('_issued_end', '')
             ],
         },
         'modified': {
-            'title': 'Modified',
+            'title': 'Zuletzt Geändert',
             'params': [
                 request.args.get('_modified_start', ''),
                 request.args.get('_modified_end', '')

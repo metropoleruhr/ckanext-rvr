@@ -141,7 +141,7 @@ class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
         '''
         Override core search fasets for datasets
         '''
-        facets_dict['date_filters'] = "Date Filters"
+        facets_dict['date_filters'] = "Datumsfilter"
         return facets_dict
 
     # IActions

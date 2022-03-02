@@ -1,13 +1,13 @@
 // Declare daterange fields
 const daterangeFields = {
-    'metadata_created': 'Date Created',
-    'metadata_modified': 'Last Updated',
-    'issued': 'Issued',
-    'modified': 'Modified'
+    'metadata_created': 'Erstellt',
+    'metadata_modified': 'Zuletzt Aktualisiert',
+    'issued': 'Veröffentlicht',
+    'modified': 'Zuletzt Geändert'
 };
 
 // Generate field id from facet name
-const fieldId = name => `#daterange-input-field`;
+const fieldId = '#daterange-input-field';
 
 /**
  * Generate the url for daterange search parameters
@@ -121,59 +121,51 @@ const addFilterListItem = (item, minFilter, maxFilter) => {
  */
 const generateDaterangePicker = (item) => {
 
-    const initialData = $(fieldId(item)).data()
+    const initialData = $(fieldId).data()
     let start = moment();
     let end = moment();
     let minFilter = '';
     let maxFilter = '';
     if (initialData.startdate) {
         start = moment(initialData.startdate, 'DD-MM-YYYY');
-        minFilter = start.format('DD MMMM, YYYY');
+        minFilter = start.format('DD.MM.YYYY');
     }
     if (initialData.enddate) {
         end = moment(initialData.enddate, 'DD-MM-YYYY');
-        maxFilter = end.format('DD MMMM, YYYY');
+        maxFilter = end.format('DD.MM.YYYY');
     }
 
     addFilterListItem(item, minFilter, maxFilter)
 
-    $(fieldId(item)).daterangepicker({
+    $(fieldId).daterangepicker({
         "showDropdowns": true,
-        "startDate": start.format('DD MMMM, YYYY'),
-        "endDate": end.format('DD MMMM, YYYY'),
-        "ranges": {
-            'Today': [moment(), moment()],
-            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-            'This Month': [moment().startOf('month'), moment().endOf('month')],
-            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-        },
+        "startDate": start.format('DD.MM.YYYY'),
+        "endDate": end.format('DD.MM.YYYY'),
         "linkedCalendars": false,
         "locale": {
-            "format": "DD MMMM, YYYY",
+            "format": "DD.MM.YYYY",
             "separator": " - ",
-            "applyLabel": "Apply",
-            "cancelLabel": "Cancel",
+            "applyLabel": "Speichern",
+            "cancelLabel": "Stornieren",
             "fromLabel": "From",
             "toLabel": "To",
             "customRangeLabel": "Custom Range",
             "alwaysShowCalendars": true,
             "weekLabel": "W",
-            "daysOfWeek": [ "Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat" ],
+            "daysOfWeek": ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
             "monthNames": [
-                "January",
-                "February",
-                "March",
+                "Januar",
+                "Februar",
+                "März",
                 "April",
-                "May",
-                "June",
-                "July",
+                "Mai",
+                "Juni",
+                "Juli",
                 "August",
                 "September",
-                "October",
+                "Oktober",
                 "November",
-                "December"
+                "Dezember"
             ]
         },
     }, (start, end, label) => {
@@ -185,4 +177,14 @@ const generateDaterangePicker = (item) => {
 
 $(function() {
     generateDaterangePicker($('#daterange-select').val());
+
+    $('#daterange-select').on('change', () => {
+        const initialData = $(fieldId).data()
+        start = moment(initialData.startdate, 'DD-MM-YYYY');
+        end = moment(initialData.enddate, 'DD-MM-YYYY');
+
+        const facet = $('#daterange-select').val();
+        const newUrl = generateFilterHref(facet, start, end);
+        document.location.href = newUrl;
+    });
 });
