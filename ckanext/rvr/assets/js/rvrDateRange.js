@@ -118,20 +118,24 @@ const addFilterListItem = (item, minFilter, maxFilter) => {
 /**
  * Get the date passed from the backend or default to today
  * 
- * @returns an array of the start and end dates
+ * @returns an array of the start and end dates and the min and max filter texts
  */
 const getFieldData = () => {
     const initialData = $(fieldId).data()
     let start = moment();
     let end = moment();
+    let minFilter = '';
+    let maxFilter = '';
     if (initialData.startdate) {
         start = moment(initialData.startdate, 'DD-MM-YYYY');
+        minFilter = start.format('DD.MM.YYYY');
     }
     if (initialData.enddate) {
         end = moment(initialData.enddate, 'DD-MM-YYYY');
+        maxFilter = end.format('DD.MM.YYYY');
     }
 
-    return [start, end]
+    return [start, end, minFilter, maxFilter]
 }
 
 /**
@@ -140,12 +144,7 @@ const getFieldData = () => {
  */
 const generateDaterangePicker = (item) => {
 
-    [start, end] = getFieldData();
-    let minFilter = '';
-    let maxFilter = '';
-
-    minFilter = start.format('DD.MM.YYYY');
-    maxFilter = end.format('DD.MM.YYYY');
+    [start, end, minFilter, maxFilter] = getFieldData();
 
     addFilterListItem(item, minFilter, maxFilter)
 
