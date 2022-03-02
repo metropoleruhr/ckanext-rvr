@@ -180,6 +180,8 @@ $(function() {
 
     $('#daterange-select').on('change', () => {
         const initialData = $(fieldId).data()
+        let start = moment();
+        let end = moment();
         start = moment(initialData.startdate, 'DD-MM-YYYY');
         end = moment(initialData.enddate, 'DD-MM-YYYY');
 
