@@ -157,7 +157,7 @@ const generateDaterangePicker = (item) => {
             "format": "DD.MM.YYYY",
             "separator": " - ",
             "applyLabel": "Speichern",
-            "cancelLabel": "Stornieren",
+            "cancelLabel": "Abbrechen",
             "fromLabel": "From",
             "toLabel": "To",
             "customRangeLabel": "Custom Range",
