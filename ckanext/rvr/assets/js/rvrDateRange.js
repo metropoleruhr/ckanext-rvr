@@ -1,9 +1,9 @@
 // Declare daterange fields
 const daterangeFields = {
-    'metadata_created': 'Erstellt',
-    'metadata_modified': 'Zuletzt Aktualisiert',
-    'issued': 'Veröffentlicht',
-    'modified': 'Zuletzt Geändert'
+    'metadata_created': 'erstellt',
+    'metadata_modified': 'zuletzt aktualisiert',
+    'issued': 'veröffentlicht',
+    'modified': 'zuletzt geändert'
 };
 
 // Generate field id from facet name
@@ -156,8 +156,8 @@ const generateDaterangePicker = (item) => {
         "locale": {
             "format": "DD.MM.YYYY",
             "separator": " - ",
-            "applyLabel": "Speichern",
-            "cancelLabel": "Abbrechen",
+            "applyLabel": "speichern",
+            "cancelLabel": "abbrechen",
             "fromLabel": "From",
             "toLabel": "To",
             "customRangeLabel": "Custom Range",
