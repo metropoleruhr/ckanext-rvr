@@ -757,7 +757,8 @@ div.social-media a i{
     cursor: pointer;
     padding: 5px 10px;
     border: 1px solid #ccc;
-    width: 100%
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .daterange-picker input {
@@ -765,6 +766,12 @@ div.social-media a i{
     width: 100%
 }
 
-.daterange-picker input:focus{
+.daterange-picker select {
+    width: 100%;
+    border: none;
+    background-color: transparent;
+}
+
+.daterange-picker *:focus{
     outline: none;
 }

@@ -258,6 +258,7 @@ def package_search(context, data_dict):
     '''
     # Get dateranges
     dateranges = data_dict.pop('dateranges', {})
+    data_dict.pop('date_filters', {})
     items_per_page = data_dict.pop('rows', 20)
     start = data_dict.pop('start', 0)
     data_dict['rows'] = 1000
@@ -367,7 +368,7 @@ def package_search(context, data_dict):
                     # Check daterange
                     is_in_range = True
                     for k in dateranges:
-                        if not filter_daterange(k, dateranges[k], package):
+                        if not filter_daterange(k, dateranges[k]['params'], package):
                             is_in_range = False
                             break
                     if not is_in_range:
@@ -392,7 +393,7 @@ def package_search(context, data_dict):
                         # Check daterange
                         is_in_range = True
                         for k in dateranges:
-                            if not filter_daterange(k, dateranges[k], package_dict):
+                            if not filter_daterange(k, dateranges[k]['params'], package_dict):
                                 is_in_range = False
                                 break
                         if not is_in_range:
