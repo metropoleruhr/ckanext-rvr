@@ -3,6 +3,7 @@ import urllib
 import ckan.plugins.toolkit as toolkit
 from ckanext.rvr.views.dataset import dataset_blueprint
 from ckanext.rvr import actions as rvrActions
+from ckanext.spatial.plugin import SpatialQuery
 
 import logging
 log = logging.getLogger(__name__)
@@ -156,3 +157,13 @@ class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
         return {
             'package_search': rvrActions.package_search
         }
+
+class RvrSpatialQueryPlugin(SpatialQuery):
+
+    def configure(self, config):
+
+        self.search_backend = config.get('ckanext.spatial.search_backend', 'postgis')
+        if self.search_backend != 'postgis' and not toolkit.check_ckan_version('2.0.1'):
+            msg = 'The Solr backends for the spatial search require CKAN 2.0.1 or higher. ' + \
+                  'Please upgrade CKAN or select the \'postgis\' backend.'
+            raise toolkit.CkanVersionException(msg)

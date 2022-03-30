@@ -1,0 +1,1 @@
+git+https://github.com/ckan/ckanext-spatial.git@5a987828cb8e76f4904c6f23542a593255171a94

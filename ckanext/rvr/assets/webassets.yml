@@ -17,3 +17,12 @@ daterange_js:
     - js/rvrDateRange.js
     - js/daterangepicker.min.js
     - js/moment.min.js
+
+spatial_query_js:
+  output: rvr/%(version)s_spatial_query.js
+  extra:
+    preload:
+      - vendor/jquery
+  contents:
+    - js/rvrSpatialQuery.js
+    - js/rvrMap.js
