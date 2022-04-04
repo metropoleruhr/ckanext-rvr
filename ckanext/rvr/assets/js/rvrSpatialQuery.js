@@ -13,8 +13,7 @@ this.ckan.module('rvr-spatial-query', function ($, _) {
           fillColor: '#F06F64',
           fillOpacity: 0.1,
           clickable: false
-        },
-        map_extent: [[90, 180], [-90, -180]]
+        }
       },
       template: {
         buttons: [
@@ -29,18 +28,11 @@ this.ckan.module('rvr-spatial-query', function ($, _) {
         var module = this;
         $.proxyAll(this, /_on/);
   
-        var map_extent = this.el.data('map_extent');
-        if (map_extent ){
-          if (map_extent instanceof Array) {
-            // Assume it's a pair of coords like [[90, 180], [-90, -180]]
-            console.log("Array", map_extent);
-            this.options.map_extent = map_extent;
-          } else if (map_extent instanceof Object) {
-            // Assume it's a GeoJSON bbox
-            console.log("Object", map_extent)
-            this.options.map_extent = new L.GeoJSON(map_extent).getBounds();
-          }
-        }
+        var corner1 = L.latLng(51.1675, 8.05544)
+        var corner2 = L.latLng(51.8609, 6.2279)
+        bounds = L.latLngBounds(corner1, corner2);
+
+        this.options.default_extent = bounds;
         this.el.ready(this._onReady);
       },
   
@@ -89,11 +81,10 @@ this.ckan.module('rvr-spatial-query', function ($, _) {
         });
 
         // OK map time
-        console.log("COORDINATES", this.options.map_extent)
         const mapConfig = {
             'type': 'wms',
             'wms.url': 'https://geodaten.metropoleruhr.de/spw2',
-            'wms.layers': 'spw2_orange',
+            'wms.layers': 'spw2_light',
             'wms.version': '1.3.0'
         }
         map = ckan.rvrWebMap(
@@ -102,7 +93,9 @@ this.ckan.module('rvr-spatial-query', function ($, _) {
           {
             attributionControl: false,
             drawControlTooltips: false,
-            maxBounds: this.options.map_extent
+            maxBounds: this.options.default_extent,
+            maxBoundsViscosity: 1.0,
+            minZoom: 8
           }
         );
   
@@ -205,7 +198,7 @@ this.ckan.module('rvr-spatial-query', function ($, _) {
             map.fitBounds([[coords[1], coords[0]], [coords[3], coords[2]]]);
           } else {
             if (!previous_bbox){
-                map.fitBounds(module.options.map_extent);
+                map.fitBounds(module.options.default_extent);
             }
           }
         }
@@ -224,4 +217,3 @@ this.ckan.module('rvr-spatial-query', function ($, _) {
       }
     }
   });
-  

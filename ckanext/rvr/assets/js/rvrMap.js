@@ -37,10 +37,8 @@
   
         var baseLayer;
 
-        console.log("What is L", L)
         map = new L.Map(container, leafletMapOptions);
   
-        console.log("Map Config", mapConfig)
         if (mapConfig.type == 'mapbox') {
             // MapBox base map
             if (!mapConfig['mapbox.map_id'] || !mapConfig['mapbox.access_token']) {
