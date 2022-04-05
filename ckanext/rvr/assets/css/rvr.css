@@ -775,3 +775,11 @@ div.social-media a i{
 .daterange-picker *:focus{
     outline: none;
 }
+
+.btn.apply.btn-primary {
+    padding: 3px 12px;
+}
+
+#dataset-map-edit-buttons {
+    padding: 5px 10px !important;
+}
