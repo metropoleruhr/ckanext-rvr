@@ -81,6 +81,7 @@ setup(
     entry_points='''
         [ckan.plugins]
         rvr=ckanext.rvr.plugin:RvrPlugin
+        rvr_spatial_query=ckanext.rvr.plugin:RvrSpatialQueryPlugin
 
         [babel.extractors]
         ckan = ckan.lib.extract:extract_ckan

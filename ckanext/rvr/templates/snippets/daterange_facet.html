@@ -1,3 +1,11 @@
+{% if dateranges %}
+    {% set startdate = dateranges[active]['params'][0] %}
+    {% set enddate = dateranges[active]['params'][1] %}
+{% else %}
+    {% set startdate = '' %}
+    {% set enddate = '' %}
+{% endif %}
+
 <div class="nav-item daterange-picker">
     <select id="daterange-select">
         {% for option in options %}
@@ -13,7 +21,7 @@
         type="text"
         name="daterange"
         id="daterange-input-field"
-        data-startdate="{{ dateranges[active]['params'][0] }}"
-        data-enddate="{{ dateranges[active]['params'][1] }}"
+        data-startdate="{{ startdate }}"
+        data-enddate="{{ enddate }}"
     />
 </div>
