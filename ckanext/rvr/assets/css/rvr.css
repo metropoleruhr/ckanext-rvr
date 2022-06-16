@@ -783,3 +783,15 @@ div.social-media a i{
 #dataset-map-edit-buttons {
     padding: 5px 10px !important;
 }
+
+.map-draw-form-group {
+    display: block;
+    height: 384px;
+    background-color: white;
+    margin: 0;
+}
+
+div#dataset-map-container.map-draw-field {
+    height: 340px;
+    position: relative;
+}
