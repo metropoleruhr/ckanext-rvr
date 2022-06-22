@@ -1,11 +1,17 @@
 import cgi
 import urllib
+import logging
+
 import ckan.plugins.toolkit as toolkit
+from ckan.logic import schema as ckan_schema
+from ckanext.rvr.helpers import is_valid_spatial
+
 from ckanext.rvr.views.dataset import dataset_blueprint
+from ckanext.rvr.views.organization import organization_blueprint
 from ckanext.rvr import actions as rvrActions
+from ckanext.rvr.commands import rvr_spatial
 from ckanext.spatial.plugin import SpatialQuery
 
-import logging
 log = logging.getLogger(__name__)
 config = toolkit.config
 ignore_missing = toolkit.get_validator('ignore_missing')
@@ -83,10 +89,20 @@ class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
     p.implements(p.IBlueprint)
     p.implements(p.IActions)
 
+    schema_options = { 
+        'default': [
+            toolkit.get_validator('ignore_missing'),
+            toolkit.get_converter('convert_to_extras')
+        ],
+        'not_empty': [toolkit.get_validator('not_empty')]
+    }
+
 
     # IBlueprint
     def get_blueprint(self):
-        return [dataset_blueprint]
+        return [
+            dataset_blueprint
+        ]
 
     # IConfigurer
     def get_helpers(self):
@@ -109,12 +125,14 @@ class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
         toolkit.add_resource('assets', 'rvr')
 
     def create_package_schema(self):
-        # let's grab the default schema in our plugin
+        # let's grab the default schema in our pluginWS
         schema = super(RvrPlugin, self).create_package_schema()
         # our custom field
         schema.update({
-            'notes': [toolkit.get_validator('not_empty')],
-            'owner_org': [toolkit.get_validator('not_empty')]
+            'notes': self.schema_options['not_empty'],
+            'owner_org': self.schema_options['not_empty'],
+            'dataset_spatial': self.schema_options['default'],
+            'spatial': self.schema_options['default']
         })
         return schema
 
@@ -123,8 +141,10 @@ class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
         schema = super(RvrPlugin, self).update_package_schema()
         # our custom field
         schema.update({
-            'notes': [toolkit.get_validator('not_empty')],
-            'owner_org': [toolkit.get_validator('not_empty')]
+            'notes': self.schema_options['not_empty'],
+            'owner_org': self.schema_options['not_empty'],
+            'dataset_spatial': self.schema_options['default'],
+            'spatial': self.schema_options['default']
         })
         return schema
 
@@ -152,15 +172,48 @@ class RvrPlugin(p.SingletonPlugin, toolkit.DefaultDatasetForm):
         Available via API /api/action/{action-name}
         '''
         return {
-            'package_search': rvrActions.package_search
+            'package_search': rvrActions.package_search,
+            'package_show': rvrActions.package_show
         }
 
-class RvrSpatialQueryPlugin(SpatialQuery):
 
-    def configure(self, config):
+class RvrSpatialQueryPlugin(SpatialQuery, toolkit.DefaultOrganizationForm):
+    p.implements(p.IGroupForm, inherit=True)
+    p.implements(p.IClick)
+    p.implements(p.ITemplateHelpers)
 
-        self.search_backend = config.get('ckanext.spatial.search_backend', 'postgis')
-        if self.search_backend != 'postgis' and not toolkit.check_ckan_version('2.0.1'):
-            msg = 'The Solr backends for the spatial search require CKAN 2.0.1 or higher. ' + \
-                  'Please upgrade CKAN or select the \'postgis\' backend.'
-            raise toolkit.CkanVersionException(msg)
+    # IClick
+    def get_commands(self):
+        return [rvr_spatial]
+
+    # ITemplateHelpers
+    def get_helpers(self):
+        return {
+            'is_valid_spatial': is_valid_spatial
+        }
+
+    # IBlueprint
+    def get_blueprint(self):
+        return [organization_blueprint]
+
+    def is_fallback(self):
+        return False
+
+    def group_types(self):
+        return ('organization',)
+
+    # IGroupForm
+    def form_to_db_schema(self):
+        schema = ckan_schema.group_form_schema()
+        schema.update({'org_spatial' : [toolkit.get_validator('ignore_missing'),
+                                        toolkit.get_converter('convert_to_extras')]})
+        return schema
+
+    def db_to_form_schema(self):
+        schema = ckan_schema.default_show_group_schema()
+        schema.update({'org_spatial' : [toolkit.get_validator('ignore_missing'),
+                                        toolkit.get_converter('convert_to_extras')]})
+        return schema
+
+    def group_form(self, group_type='organization'):
+        return 'organization/snippets/organization_form.html'

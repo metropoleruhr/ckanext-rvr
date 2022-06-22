@@ -26,3 +26,14 @@ spatial_query_js:
   contents:
     - js/rvrSpatialQuery.js
     - js/rvrMap.js
+
+bbox_generator_js:
+  output: rvr/%(version)s_bbox_generator.js
+  extra:
+    preload:
+      - vendor/jquery
+  contents:
+    - js/vendor/leaflet/leaflet.js
+    - js/vendor/leaflet.draw/leaflet.draw.js
+    - js/rvrMap.js
+    - js/rvrBBOXGenerator.js
